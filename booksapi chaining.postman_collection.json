@@ -1,0 +1,477 @@
+{
+	"info": {
+		"_postman_id": "506895ba-e004-4b37-967e-5db078640ee8",
+		"name": "booksapi chaining",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48155815"
+	},
+	"item": [
+		{
+			"name": "submit order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = pm.response.json();",
+							"",
+							"// Save orderId from response",
+							"pm.environment.set(\"orderId\", jsonData.orderId);",
+							"",
+							"// Save the same hardcoded request values into variables",
+							"let requestBody = JSON.parse(pm.request.body.raw);",
+							"pm.environment.set(\"bookId\", requestBody.bookId);",
+							"pm.environment.set(\"customerName\", requestBody.customerName);",
+							"",
+							"console.log(\"Created orderId:\", jsonData.orderId);",
+							"console.log(\"BookId stored:\", requestBody.bookId);",
+							"console.log(\"CustomerName stored:\", requestBody.customerName);",
+							"",
+							"pm.test(\"Order created successfully\", function () {",
+							"    pm.expect(jsonData).to.have.property(\"created\", true);",
+							"    pm.expect(jsonData).to.have.property(\"orderId\");",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"bookId\": 1,\n  \"customerName\": \"Joeeee\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/orders",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all orders",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"let orders = pm.response.json();",
+							"let expectedId = pm.environment.get(\"orderId\");",
+							"let expectedBookId = parseInt(pm.environment.get(\"bookId\"));",
+							"let expectedCustomerName = pm.environment.get(\"customerName\");",
+							"",
+							"// Look for the created order in the list",
+							"let order = orders.find(orders => orders.id === expectedId);",
+							"",
+							"pm.test(\"Created orderId is present in orders list\", function () {",
+							"    pm.expect(order, \"Order not found in list\").to.not.be.undefined;",
+							"});",
+							"",
+							"if (order) {",
+							"    pm.test(\"BookId matches POST value\", function () {",
+							"        pm.expect(order.bookId).to.eql(expectedBookId);",
+							"    });",
+							"",
+							"    pm.test(\"CustomerName matches POST value\", function () {",
+							"        pm.expect(order.customerName).to.eql(expectedCustomerName);",
+							"    });",
+							"",
+							"    console.log(\"Validated order:\", order);",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get order by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"let jsonData = pm.response.json();",
+							"",
+							"// Get values from environment",
+							"let expectedId = pm.environment.get(\"orderId\");",
+							"let expectedBookId = parseInt(pm.environment.get(\"bookId\"));",
+							"let expectedCustomerName = pm.environment.get(\"customerName\");",
+							"",
+							"// Validate order ID",
+							"pm.test(\"Order ID matches\", function () {",
+							"    pm.expect(jsonData.id).to.eql(expectedId);",
+							"});",
+							"",
+							"// Validate Book ID",
+							"pm.test(\"BookId matches POST value\", function () {",
+							"    pm.expect(jsonData.bookId).to.eql(expectedBookId);",
+							"});",
+							"",
+							"// Validate Customer Name",
+							"pm.test(\"CustomerName matches POST value\", function () {",
+							"    pm.expect(jsonData.customerName).to.eql(expectedCustomerName);",
+							"});",
+							"",
+							"console.log(\"Single order validated:\", jsonData);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders/{{orderId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"{{orderId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update customer name",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let newName = \"Customer_\" + Math.floor(Math.random() * 10000);",
+							"pm.environment.set(\"updatedName\", newName);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is  204\", function () {",
+							"     pm.response.to.have.status(204);",
+							"});",
+							"",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerName\": \"{{updatedName}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/orders/{{orderId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"{{orderId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get order by id Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"let jsonData = pm.response.json();",
+							"",
+							"// Stored variables",
+							"let expectedId = pm.environment.get(\"orderId\");",
+							"let expectedBookId = parseInt(pm.environment.get(\"bookId\"));",
+							"let expectedUpdatedName = pm.environment.get(\"updatedName\");",
+							"",
+							"// Validate Order ID",
+							"pm.test(\"Order ID matches the one created\", function () {",
+							"    pm.expect(jsonData.id).to.eql(expectedId);",
+							"});",
+							"",
+							"// Validate Book ID (should remain unchanged)",
+							"pm.test(\"BookId remains the same after update\", function () {",
+							"    pm.expect(jsonData.bookId).to.eql(expectedBookId);",
+							"});",
+							"",
+							"// Validate updated Customer Name",
+							"pm.test(\"CustomerName is updated correctly\", function () {",
+							"    pm.expect(jsonData.customerName).to.eql(expectedUpdatedName);",
+							"});",
+							"",
+							"console.log(\"Order after update validated:\", jsonData);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders/{{orderId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"{{orderId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"",
+							"// Clean up variables (keep orderId for verification)",
+							"pm.environment.unset(\"bookId\");",
+							"pm.environment.unset(\"customerName\");",
+							"pm.environment.unset(\"updatedName\");",
+							"",
+							"console.log(\"Deleted order:\", pm.environment.get(\"orderId\"));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/orders/{{orderId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"{{orderId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get order by id Copy 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 after deletion\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"let jsonData = pm.response.json();",
+							"let deletedId = pm.environment.get(\"orderId\");",
+							"",
+							"// ✅ Match the full error message exactly",
+							"pm.test(\"Error message is correct and exact\", function () {",
+							"    pm.expect(jsonData.error).to.eql(`No order with id ${deletedId}.`);",
+							"});",
+							"",
+							"// Cleanup: unset orderId as well",
+							"pm.environment.unset(\"orderId\");",
+							"",
+							"console.log(\"Verified deleted order response:\", jsonData);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/orders/{{orderId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"orders",
+						"{{orderId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "f22207fc1ed2c7f7aee1bf55a5098fe19aa9668ed2315596af0d4dff167aea83",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		}
+	]
+}

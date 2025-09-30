@@ -1,0 +1,1617 @@
+{
+	"info": {
+		"_postman_id": "c3d794e1-d19c-4321-a40e-e38d0b7b0e7d",
+		"name": "Petstore User model",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48155815"
+	},
+	"item": [
+		{
+			"name": "create user with list",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Generate random user data",
+							"let randomId = Math.floor(Math.random() * 1000000);",
+							"let randomUsername = `user_${randomId}`;",
+							"let randomFirstName = pm.variables.replaceIn(\"{{$randomFirstName}}\");",
+							"let randomLastName = pm.variables.replaceIn(\"{{$randomLastName}}\");",
+							"let randomEmail = `test_${randomId}@example.com`;",
+							"let randomPassword = `Pass_${Math.floor(Math.random() * 99999)}`;",
+							"let randomPhone = `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`;",
+							"",
+							"console.log(\"Generated user data:\", { randomId, randomUsername, randomFirstName, randomLastName, randomEmail, randomPassword, randomPhone });",
+							"",
+							"// Save user as environment variables",
+							"pm.environment.set(\"id\", randomId);",
+							"pm.environment.set(\"username\", randomUsername);",
+							"pm.environment.set(\"firstName\", randomFirstName);",
+							"pm.environment.set(\"lastName\", randomLastName);",
+							"pm.environment.set(\"email\", randomEmail);",
+							"pm.environment.set(\"password\", randomPassword);",
+							"pm.environment.set(\"phone\", randomPhone);",
+							"",
+							"console.log(\"User data saved as environment variables\");",
+							"",
+							"// Build request body dynamically",
+							"const newUser = {",
+							"    id: parseInt(pm.environment.get(\"id\")),",
+							"    username: pm.environment.get(\"username\"),",
+							"    firstName: pm.environment.get(\"firstName\"),",
+							"    lastName: pm.environment.get(\"lastName\"),",
+							"    email: pm.environment.get(\"email\"),",
+							"    password: pm.environment.get(\"password\"),",
+							"    phone: pm.environment.get(\"phone\"),",
+							"    userStatus: 0",
+							"};",
+							"",
+							"// Overwrite 'users' environment variable with single-user array",
+							"pm.environment.set(\"users\", JSON.stringify([newUser]));",
+							"",
+							"console.log(newUser);",
+							"",
+							"// Log final request body",
+							"console.log(\"Final request body to be sent:\", JSON.stringify(newUser, null, 2));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"🔹 Step 0: Parsed response\");",
+							"",
+							"// ✅ Step 1: Status code check",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Step 2: Response time check (<2000ms)",
+							"pm.test(\"Response time is under 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Step 3: Content-Type header check",
+							"pm.test(\"Response has JSON content type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ Step 4: Validate specific field (`message`)",
+							"pm.test(\"Response message is 'ok'\", function () {",
+							"    pm.expect(res.message).to.eql(\"ok\");",
+							"});",
+							"console.log(\"✅ Message validated:\", res.message);",
+							"",
+							"// ✅ Step 5: JSON Schema validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Response body matches schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Schema validated\");",
+							"",
+							"// ✅ Step 6: Log full response (optional)",
+							"console.log(\"📩 Full response data:\", JSON.stringify(res, null, 2));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n  {\n    \"id\": {{id}},\n    \"username\": \"{{username}}\",\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"phone\": \"{{phone}}\",\n    \"userStatus\": 0\n  }\n]\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/createWithList",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"createWithList"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'https://petstore.swagger.io/v2/user/createWithList' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '[\n  {\n    \"id\": 0,\n    \"username\": \"string\",\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"password\": \"string\",\n    \"phone\": \"string\",\n    \"userStatus\": 0\n  }\n]'"
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse GET response",
+							"let jsonData = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(jsonData, null, 2));",
+							"",
+							"// Get the saved 'users' array from environment",
+							"let users = JSON.parse(pm.environment.get(\"users\"));",
+							"if (!users || users.length === 0) {",
+							"    console.error(\"❌ No user data found in environment variable 'users'\");",
+							"    throw new Error(\"Environment variable 'users' is empty\");",
+							"}",
+							"",
+							"// Since we always have a single user, access the first element",
+							"let savedUser = users[0];",
+							"console.log(\"📌 User data from environment to validate against:\", savedUser);",
+							"",
+							"// ✅ Status code validation",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time validation (<3 seconds)",
+							"pm.test(\"Response time is under 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type validation",
+							"pm.test(\"Response has JSON content type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ JSON Schema validation for user object",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\", format: \"email\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Response body matches user schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ JSON schema validated\");",
+							"",
+							"// ✅ Dynamic field validation by looping over saved user fields",
+							"pm.test(\"Response values match saved user data\", function () {",
+							"    for (let key in savedUser) {",
+							"        pm.expect(jsonData[key], `Mismatch for field '${key}'`).to.eql(savedUser[key]);",
+							"        console.log(`✅ Field '${key}' validated:`, jsonData[key]);",
+							"    }",
+							"});",
+							"",
+							"console.log(\"🎉 All response fields successfully validated against saved user data\");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login ",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.environment.get(\"username\") || !pm.environment.get(\"password\")) {",
+							"    console.warn(\"⚠️ Username or password not set in environment!\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse login response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Login response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code validation",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time validation (<3s)",
+							"pm.test(\"Response time is under 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type validation",
+							"pm.test(\"Response has JSON content type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ JSON Schema validation for login response",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Login response matches schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ JSON schema validated\");",
+							"",
+							"// ✅ Validate code and message format",
+							"pm.test(\"Login code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"});",
+							"console.log(\"✅ Login code validated:\", res.code);",
+							"",
+							"// Extract session ID from message (optional, if you want to reuse session)",
+							"let sessionMatch = res.message.match(/session:(\\d+)/);",
+							"if (sessionMatch) {",
+							"    let sessionId = sessionMatch[1];",
+							"    pm.environment.set(\"sessionId\", sessionId);",
+							"    console.log(\"✅ Session ID extracted and saved:\", sessionId);",
+							"} else {",
+							"    console.log(\"ℹ️ No session ID found in message\");",
+							"}",
+							"",
+							"console.log(\"🎉 Login validation completed successfully\");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/user/login?username={{username}}&password={{password}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"login"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'https://petstore.swagger.io/v2/user/login?username=user_184633&password=Pass_13053' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse logout response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Logout response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code validation",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time validation (<3s)",
+							"pm.test(\"Response time is under 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type validation",
+							"pm.test(\"Response has JSON content type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ JSON Schema validation for logout response",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Logout response matches schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ JSON schema validated\");",
+							"",
+							"// ✅ Validate response values",
+							"pm.test(\"Logout message is 'ok' and code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"    pm.expect(res.message).to.eql(\"ok\");",
+							"});",
+							"console.log(\"✅ Logout response values validated:\", { code: res.code, message: res.message });",
+							"",
+							"// Optional: clear session-related variables",
+							"pm.environment.unset(\"sessionId\");",
+							"console.log(\"✅ Session variables cleared after logout\");",
+							"",
+							"console.log(\"🎉 Logout validation completed successfully\");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/user/logout",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"logout"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'https://petstore.swagger.io/v2/user/logout' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "login  again",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.environment.get(\"username\") || !pm.environment.get(\"password\")) {",
+							"    console.warn(\"⚠️ Username or password not set in environment!\");",
+							"}",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse login response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Login response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code validation",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time validation (<3s)",
+							"pm.test(\"Response time is under 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type validation",
+							"pm.test(\"Response has JSON content type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ JSON Schema validation for login response",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Login response matches schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ JSON schema validated\");",
+							"",
+							"// ✅ Validate code and message format",
+							"pm.test(\"Login code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"});",
+							"console.log(\"✅ Login code validated:\", res.code);",
+							"",
+							"// Extract session ID from message (optional, if you want to reuse session)",
+							"let sessionMatch = res.message.match(/session:(\\d+)/);",
+							"if (sessionMatch) {",
+							"    let sessionId = sessionMatch[1];",
+							"    pm.environment.set(\"sessionId\", sessionId);",
+							"    console.log(\"✅ Session ID extracted and saved:\", sessionId);",
+							"} else {",
+							"    console.log(\"ℹ️ No session ID found in message\");",
+							"}",
+							"",
+							"console.log(\"🎉 Login validation completed successfully\");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/user/login?username={{username}}&password={{password}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"login"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "{{username}}"
+						},
+						{
+							"key": "password",
+							"value": "{{password}}"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'https://petstore.swagger.io/v2/user/login?username=user_184633&password=Pass_13053' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "update user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Get the existing user from environment",
+							"let savedUser = JSON.parse(pm.environment.get(\"users\"))[0];",
+							"",
+							"// Update dynamic fields",
+							"let updatedFirstName = savedUser.firstName + \"_Updated\";",
+							"let updatedLastName = savedUser.lastName + \"_Updated\";",
+							"let updatedEmail = savedUser.email.replace(\"@\", \"_upd@\");",
+							"",
+							"// Build the request body",
+							"const requestBody = {",
+							"    id: savedUser.id,",
+							"    username: savedUser.username,",
+							"    firstName: updatedFirstName,",
+							"    lastName: updatedLastName,",
+							"    email: updatedEmail,",
+							"    password: savedUser.password,",
+							"    phone: savedUser.phone,",
+							"    userStatus: savedUser.userStatus // keep 0",
+							"};",
+							"",
+							"// Update environment variables",
+							"pm.environment.set(\"firstName\", updatedFirstName);",
+							"pm.environment.set(\"lastName\", updatedLastName);",
+							"pm.environment.set(\"email\", updatedEmail);",
+							"pm.environment.set(\"users\", JSON.stringify([requestBody]));",
+							"",
+							"// ✅ Schema definition for validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\", format: \"email\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"// ✅ Pre-request schema validation",
+							"pm.test(\"Pre-request: Request body matches schema\", function () {",
+							"    pm.expect(requestBody).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Pre-request: Request body validated against schema\");",
+							"",
+							"// Set the request body dynamically for sending",
+							"pm.request.body.raw = JSON.stringify(requestBody);",
+							"console.log(\"📦 PUT request body ready to send:\", JSON.stringify(requestBody, null, 2));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time",
+							"pm.test(\"Response time < 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ Schema",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ JSON schema validated\");",
+							"",
+							"// ✅ Response code",
+							"pm.test(\"Update user response code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"});",
+							"console.log(\"✅ Response code validated:\", res.code);",
+							"",
+							"// ✅ Validate that message contains the updated user ID",
+							"let savedUser = JSON.parse(pm.environment.get(\"users\"))[0];",
+							"pm.test(\"Response message contains  user ID\", function () {",
+							"    pm.expect(res.message).to.eql(savedUser.id.toString());",
+							"});",
+							"console.log(\"✅ Response message matches  user ID:\", res.message);",
+							"",
+							"// Log final success",
+							"console.log(\"🎉 User updated successfully, ID confirmed:\", res.message);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "  {\n    \"id\": {{id}},\n    \"username\": \"{{username}}\",\n    \"firstName\": \"{{firstName}}\",\n    \"lastName\": \"{{lastName}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"phone\": \"{{phone}}\",\n    \"userStatus\": 0\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse GET response",
+							"let jsonData = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(jsonData, null, 2));",
+							"",
+							"// Get the saved 'users' array from environment",
+							"let users = JSON.parse(pm.environment.get(\"users\"));",
+							"if (!users || users.length === 0) {",
+							"    console.error(\"❌ No user data found in environment variable 'users'\");",
+							"    throw new Error(\"Environment variable 'users' is empty\");",
+							"}",
+							"",
+							"// Since we always have a single user, access the first element",
+							"let savedUser = users[0];",
+							"console.log(\"📌 User data from environment to validate against:\", savedUser);",
+							"",
+							"// ✅ Status code validation",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time validation (<3 seconds)",
+							"pm.test(\"Response time is under 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type validation",
+							"pm.test(\"Response has JSON content type\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ JSON Schema validation for user object",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\", format: \"email\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Response body matches user schema\", function () {",
+							"    pm.response.to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ JSON schema validated\");",
+							"",
+							"// ✅ Dynamic field validation by looping over saved user fields",
+							"pm.test(\"Response values match saved user data\", function () {",
+							"    for (let key in savedUser) {",
+							"        pm.expect(jsonData[key], `Mismatch for field '${key}'`).to.eql(savedUser[key]);",
+							"        console.log(`✅ Field '${key}' validated:`, jsonData[key]);",
+							"    }",
+							"});",
+							"",
+							"console.log(\"🎉 All response fields successfully validated against saved user data\");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create users with array",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Read the body defined in Postman",
+							"let requestBody = pm.request.body.raw ? JSON.parse(pm.request.body.raw) : [];",
+							"",
+							"// Ensure it's an array",
+							"if (!Array.isArray(requestBody)) requestBody = [];",
+							"",
+							"// Update each user dynamically",
+							"requestBody = requestBody.map((user, index) => {",
+							"    return {",
+							"        id: Math.floor(Math.random() * 1000000),",
+							"        username: `user_${Math.floor(Math.random() * 10000)}`,",
+							"        firstName: `First${index + 1}`,",
+							"        lastName: `Last${index + 1}`,",
+							"        email: `user${index + 1}_${Math.floor(Math.random() * 1000)}@example.com`,",
+							"        password: `Pass${Math.floor(Math.random() * 10000)}`,",
+							"        phone: `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`,",
+							"        userStatus: 0 // hardcoded",
+							"    };",
+							"});",
+							"",
+							"// ✅ Schema for request body validation",
+							"const schema = {",
+							"    type: \"array\",",
+							"    items: {",
+							"        type: \"object\",",
+							"        required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"        properties: {",
+							"            id: { type: \"number\" },",
+							"            username: { type: \"string\" },",
+							"            firstName: { type: \"string\" },",
+							"            lastName: { type: \"string\" },",
+							"            email: { type: \"string\", format: \"email\" },",
+							"            password: { type: \"string\" },",
+							"            phone: { type: \"string\" },",
+							"            userStatus: { type: \"number\" }",
+							"        },",
+							"        additionalProperties: false",
+							"    }",
+							"};",
+							"",
+							"// Validate request body schema",
+							"pm.test(\"Pre-request: Request body matches schema\", function () {",
+							"    pm.expect(requestBody).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Pre-request: Request body validated against schema\");",
+							"",
+							"// Save updated array in environment for future requests",
+							"pm.environment.set(\"multiUsers\", JSON.stringify(requestBody));",
+							"",
+							"// Set the request body for sending",
+							"pm.request.body.raw = JSON.stringify(requestBody, null, 2);",
+							"console.log(\"📦 POST request body ready:\", JSON.stringify(requestBody, null, 2));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time",
+							"pm.test(\"Response time < 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ Response schema validation",
+							"const responseSchema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.expect(res).to.have.jsonSchema(responseSchema);",
+							"});",
+							"console.log(\"✅ Response schema validated\");",
+							"",
+							"// ✅ Response code",
+							"pm.test(\"Response code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"});",
+							"console.log(\"✅ Response code validated:\", res.code);",
+							"",
+							"// ✅ Response message",
+							"pm.test(\"Response message is 'ok'\", function () {",
+							"    pm.expect(res.message).to.eql(\"ok\");",
+							"});",
+							"console.log(\"✅ Response message validated:\", res.message);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n  {\n    \"id\": \"number\",\n    \"username\": \"string\",\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"password\": \"string\",\n    \"phone\": \"string\",\n    \"userStatus\": 0\n  },\n  {\n    \"id\": \"number\",\n    \"username\": \"string\",\n    \"firstName\": \"string\",\n    \"lastName\": \"string\",\n    \"email\": \"string\",\n    \"password\": \"string\",\n    \"phone\": \"string\",\n    \"userStatus\": 0\n  }\n]\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://petstore.swagger.io/v2/user/createWithArray",
+					"protocol": "https",
+					"host": [
+						"petstore",
+						"swagger",
+						"io"
+					],
+					"path": [
+						"v2",
+						"user",
+						"createWithArray"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'https://petstore.swagger.io/v2/user/createWithArray' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '[\n  {\n    \"id\": 90909,\n    \"username\": \"a\",\n    \"firstName\": \"s\",\n    \"lastName\": \"d\",\n    \"email\": \"f\",\n    \"password\": \"g\",\n    \"phone\": \"h\",\n    \"userStatus\": 0\n  },\n{\n    \"id\": 80809,\n    \"username\": \"z\",\n    \"firstName\": \"x\",\n    \"lastName\": \"c\",\n    \"email\": \"v\",\n    \"password\": \"b\",\n    \"phone\": \"n\",\n    \"userStatus\": 0\n  }\n]'"
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username Created from array(first)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 📩 Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// 📦 Get multi-user array from environment",
+							"let multiUsers = JSON.parse(pm.environment.get(\"multiUsers\"));",
+							"",
+							"// 🎯 Find the user corresponding to multiUsername",
+							"let savedUser = multiUsers.find(u => u.username === pm.environment.get(\"multiUsername\"));",
+							"",
+							"if (!savedUser) {",
+							"    console.error(\"❌ Username not found in stored array:\", pm.environment.get(\"multiUsername\"));",
+							"    throw new Error(\"Username not found in multi-user environment array\");",
+							"}",
+							"console.log(\"📌 Validating user:\", savedUser.username);",
+							"",
+							"// ✅ Schema validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.expect(res).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Schema validated\");",
+							"",
+							"// ✅ Dynamic field validation with per-field console logs",
+							"pm.test(\"All response fields match stored user data\", function () {",
+							"    Object.keys(savedUser).forEach(key => {",
+							"        pm.expect(res[key], `Mismatch in field: ${key}`).to.eql(savedUser[key]);",
+							"        console.log(`✅ Field matched: ${key} → Expected: ${savedUser[key]}, Got: ${res[key]}`);",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"// Get multi-user array from environment",
+							"let multiUsers = JSON.parse(pm.environment.get(\"multiUsers\"));",
+							"",
+							"// Pick the user you want to check (e.g., first user)",
+							"let userToCheck = multiUsers[0];",
+							"",
+							"// Store the username in a new variable",
+							"pm.environment.set(\"multiUsername\", userToCheck.username);",
+							"",
+							"console.log(\"📌 Username for GET /user/{username} request:\", userToCheck.username);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{multiUsername}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{multiUsername}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username Created from array(second)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 📩 Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// 📦 Get multi-user array from environment",
+							"let multiUsers = JSON.parse(pm.environment.get(\"multiUsers\"));",
+							"",
+							"// 🎯 Find the user corresponding to multiUsername",
+							"let savedUser = multiUsers.find(u => u.username === pm.environment.get(\"multiUsername\"));",
+							"",
+							"if (!savedUser) {",
+							"    console.error(\"❌ Username not found in stored array:\", pm.environment.get(\"multiUsername\"));",
+							"    throw new Error(\"Username not found in multi-user environment array\");",
+							"}",
+							"console.log(\"📌 Validating user:\", savedUser.username);",
+							"",
+							"// ✅ Schema validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.expect(res).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Schema validated\");",
+							"",
+							"// ✅ Validate all fields with detailed logs",
+							"pm.test(\"All response fields match stored user data\", function () {",
+							"    for (let key in savedUser) {",
+							"        pm.expect(res[key], `Mismatch in field: ${key}`).to.eql(savedUser[key]);",
+							"        console.log(`✅ Field validated → ${key}: expected=${savedUser[key]}, actual=${res[key]}`);",
+							"    }",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"",
+							"// Get multi-user array from environment",
+							"let multiUsers = JSON.parse(pm.environment.get(\"multiUsers\"));",
+							"",
+							"// Pick the user you want to check (e.g., first user)",
+							"let userToCheck = multiUsers[1];",
+							"",
+							"// Store the username in a new variable",
+							"pm.environment.set(\"multiUsername\", userToCheck.username);",
+							"",
+							"console.log(\"📌 Username for GET /user/{username} request:\", userToCheck.username);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{multiUsername}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{multiUsername}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "creating a user while logged in",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Generate dynamic user data",
+							"let newUser = {",
+							"    id: Math.floor(Math.random() * 1000000),",
+							"    username: `user_${Math.floor(Math.random() * 10000)}`,",
+							"    firstName: `First_${Math.floor(Math.random() * 100)}`,",
+							"    lastName: `Last_${Math.floor(Math.random() * 100)}`,",
+							"    email: `user${Math.floor(Math.random() * 10000)}@example.com`,",
+							"    password: `Pass${Math.floor(Math.random() * 10000)}`,",
+							"    phone: `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`,",
+							"    userStatus: 0 // hardcoded",
+							"};",
+							"",
+							"// ✅ Schema for request body validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\", format: \"email\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"// Validate the request body schema",
+							"pm.test(\"Pre-request: Request body matches schema\", function () {",
+							"    pm.expect(newUser).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Pre-request: Request body validated against schema\");",
+							"",
+							"// Save the user in environment for future GET requests or validation",
+							"pm.environment.set(\"createdUser\", JSON.stringify(newUser));",
+							"",
+							"// Set the request body for sending",
+							"pm.request.body.raw = JSON.stringify(newUser, null, 2);",
+							"console.log(\"📦 POST request body ready:\", JSON.stringify(newUser, null, 2));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time",
+							"pm.test(\"Response time < 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ Response schema validation",
+							"const responseSchema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.expect(res).to.have.jsonSchema(responseSchema);",
+							"});",
+							"console.log(\"✅ Response schema validated\");",
+							"",
+							"// ✅ Response code",
+							"pm.test(\"Response code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"});",
+							"console.log(\"✅ Response code validated:\", res.code);",
+							"",
+							"// ✅ Log the user ID returned in message",
+							"pm.test(\"Response message contains user ID\", function () {",
+							"    console.log(\"🆔 Created user ID from response:\", res.message);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": \"number\",\n  \"username\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"email\": \"string\",\n  \"password\": \"string\",\n  \"phone\": \"string\",\n  \"userStatus\": 0\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username (created logged in)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// 📩 Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Standard validations",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"pm.test(\"Response time < 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// 📦 Get the created user from environment",
+							"let savedUser = JSON.parse(pm.environment.get(\"createdUser\"));",
+							"console.log(\"📌 Validating user:\", savedUser.username);",
+							"",
+							"// ✅ Schema validation for user response",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"id\", \"username\", \"firstName\", \"lastName\", \"email\", \"password\", \"phone\", \"userStatus\"],",
+							"    properties: {",
+							"        id: { type: \"number\" },",
+							"        username: { type: \"string\" },",
+							"        firstName: { type: \"string\" },",
+							"        lastName: { type: \"string\" },",
+							"        email: { type: \"string\" },",
+							"        password: { type: \"string\" },",
+							"        phone: { type: \"string\" },",
+							"        userStatus: { type: \"number\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.expect(res).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Schema validated\");",
+							"",
+							"// ✅ Validate all fields with detailed logs",
+							"pm.test(\"All response fields match stored user data\", function () {",
+							"    for (let key in savedUser) {",
+							"        pm.expect(res[key], `Mismatch for field '${key}'`).to.eql(savedUser[key]);",
+							"        console.log(`✅ Field validated → ${key}: expected=${savedUser[key]}, actual=${res[key]}`);",
+							"    }",
+							"});",
+							"",
+							"console.log(\"🎉 All response fields successfully validated against createdUser\");",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Get the newly created user from environment",
+							"let createdUser = JSON.parse(pm.environment.get(\"createdUser\"));",
+							"",
+							"// Set a dedicated variable for GET request",
+							"pm.environment.set(\"createdUsername\", createdUser.username);",
+							"",
+							"console.log(\"📌 Username for GET /user/{username} request:\", createdUser.username);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{createdUsername}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{createdUsername}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete a user",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Just log which user will be deleted",
+							"console.log(\"📌 Deleting first saved user:\", pm.environment.get(\"username\"));",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response",
+							"let res = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(res, null, 2));",
+							"",
+							"// ✅ Status code validation",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
+							"",
+							"// ✅ Response time check (< 3s)",
+							"pm.test(\"Response time < 3s\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"console.log(\"✅ Response time validated:\", pm.response.responseTime, \"ms\");",
+							"",
+							"// ✅ Content-Type validation",
+							"pm.test(\"Response is JSON\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+							"});",
+							"console.log(\"✅ Content-Type validated:\", pm.response.headers.get(\"Content-Type\"));",
+							"",
+							"// ✅ Response schema validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"pm.test(\"Response matches schema\", function () {",
+							"    pm.expect(res).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Response schema validated\");",
+							"",
+							"// ✅ Response code check",
+							"pm.test(\"Response code is 200\", function () {",
+							"    pm.expect(res.code).to.eql(200);",
+							"});",
+							"console.log(\"✅ Response code validated:\", res.code);",
+							"",
+							"// ✅ Validate that the deleted user matches the username",
+							"pm.test(\"Deleted username matches request\", function () {",
+							"    pm.expect(res.message).to.eql(pm.environment.get(\"username\"));",
+							"});",
+							"console.log(\"🗑️ User deleted successfully:\", res.message);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by username after delete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse response",
+							"let response = pm.response.json();",
+							"",
+							"// Validate response code",
+							"pm.test(\"Status code is 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"// Validate response schema and values",
+							"pm.test(\"Response body matches expected error structure\", function () {",
+							"    pm.expect(response).to.have.property(\"code\", 1);",
+							"    pm.expect(response).to.have.property(\"type\", \"error\");",
+							"    pm.expect(response).to.have.property(\"message\", \"User not found\");",
+							"});",
+							"",
+							"// Log validated parts",
+							"console.log(\"❌ Deleted user fetch attempt validated:\");",
+							"console.log(\"   code:\", response.code);",
+							"console.log(\"   type:\", response.type);",
+							"console.log(\"   message:\", response.message);",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/user/{{username}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"{{username}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": ""
+		}
+	]
+}
