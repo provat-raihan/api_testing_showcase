@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "c3d794e1-d19c-4321-a40e-e38d0b7b0e7d",
-		"name": "Petstore User model",
+		"name": "Petstore_User_model",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "48155815"
 	},
@@ -1539,26 +1539,46 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"// Parse response",
+							"// 📩 Parse response",
 							"let response = pm.response.json();",
+							"console.log(\"📩 Response received:\", JSON.stringify(response, null, 2));",
 							"",
-							"// Validate response code",
+							"// ✅ Validate status code",
 							"pm.test(\"Status code is 404 Not Found\", function () {",
 							"    pm.response.to.have.status(404);",
 							"});",
+							"console.log(\"✅ Status code validated:\", pm.response.status);",
 							"",
-							"// Validate response schema and values",
-							"pm.test(\"Response body matches expected error structure\", function () {",
-							"    pm.expect(response).to.have.property(\"code\", 1);",
-							"    pm.expect(response).to.have.property(\"type\", \"error\");",
-							"    pm.expect(response).to.have.property(\"message\", \"User not found\");",
+							"// ✅ Schema validation",
+							"const schema = {",
+							"    type: \"object\",",
+							"    required: [\"code\", \"type\", \"message\"],",
+							"    properties: {",
+							"        code: { type: \"number\" },",
+							"        type: { type: \"string\" },",
+							"        message: { type: \"string\" }",
+							"    },",
+							"    additionalProperties: false",
+							"};",
+							"",
+							"pm.test(\"Response matches error schema\", function () {",
+							"    pm.expect(response).to.have.jsonSchema(schema);",
+							"});",
+							"console.log(\"✅ Schema validated\");",
+							"",
+							"// ✅ Field-by-field validation with logs",
+							"pm.test(\"Response body matches expected error values\", function () {",
+							"    pm.expect(response.code).to.eql(1);",
+							"    console.log(\"✅ Field validated → code:\", response.code);",
+							"",
+							"    pm.expect(response.type).to.eql(\"error\");",
+							"    console.log(\"✅ Field validated → type:\", response.type);",
+							"",
+							"    pm.expect(response.message).to.eql(\"User not found\");",
+							"    console.log(\"✅ Field validated → message:\", response.message);",
 							"});",
 							"",
-							"// Log validated parts",
-							"console.log(\"❌ Deleted user fetch attempt validated:\");",
-							"console.log(\"   code:\", response.code);",
-							"console.log(\"   type:\", response.type);",
-							"console.log(\"   message:\", response.message);",
+							"console.log(\"🎉 Deleted user fetch attempt correctly returned expected error response\");",
 							""
 						],
 						"type": "text/javascript",
@@ -1611,7 +1631,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": ""
+			"value": "https://petstore.swagger.io/v2"
 		}
 	]
 }
